@@ -46,7 +46,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
 setup(name='docassemble.MADivorce',
       version='0.0.1',
       description=('Complete Guide to File No-Fault 1A Divorces'),
-      long_description='# docassemble.MADivorce\n\nComplete Guide to File No-Fault 1A Divorces\n\n## Author\n\neinman@suffolk.edu\n\n',
+      long_description='# docassemble.MADivorce\r\n\r\nComplete Guide to File No-Fault 1A Divorces\r\n\r\n## Author\r\n\r\neinman@suffolk.edu\r\n\r\n',
       long_description_content_type='text/markdown',
       author='Elicia M. Inman',
       author_email='einman@suffolk.edu',

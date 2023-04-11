@@ -1,0 +1,671 @@
+include:
+  - docassemble.AssemblyLine:al_package.yml
+  - docassemble.MassAccess:massaccess.yml
+  - affidavit.yml
+  - affidavit_body.yml
+---
+features:
+  go full screen: mobile
+  navigation: True
+  progress bar: True
+---
+id: Mobile Screen Features
+code: |
+  if device().is_mobile or device().is_tablet:
+    on_mobile = True
+  else:
+    on_mobile = False
+---
+metadata:
+  title: |
+    File for a No-Fault 1A Divorce in Massachusetts
+  short title: |
+    1A Divorce
+  description: |
+    Use this form if you would like to file for a 1A divorce without an attorney in the State of Massachusetts.
+  authors:
+    - name: Elicia M. Inman
+    - organization: Suffolk LIT Lab
+  revision_date: 2023-03-06
+  tags:
+    - Divorce
+    - Uncontested Divorce
+    - 1A Divorce
+    - Family Law
+    - Family
+    - Separation
+    - No-Fault
+---
+id: Navigation Labels
+sections:
+  - Introduction
+  - Divorce Eligibility
+  - General Information
+  - Questionnaire:
+    - About Marriage
+    - About Children
+    - About Assets
+  - Special Requests
+  - Conclusion
+progressive: False
+---
+id: Main Interview Code Block
+code: |
+  al_intro_screen
+  divorce_intro_screen
+
+  if not user_legally_married:
+    not_eligible_screen
+  if not broken_beyond_repair:
+    not_eligible_screen
+  if not full_agreement:
+    not_eligible_screen
+  if not mass_resident and not (reason_in_mass and is_mass_couple):
+    not_eligible_screen
+  divorce_eligibility_screen
+  
+  users[0].name.first
+  users[0].gender
+  users[0].address.address
+  user_number_of_marriages
+  user_currently_in_military
+  spouse_info_screen
+  other_parties[0].name.first
+  other_parties[0].gender
+  other_parties[0].address.address
+  spouse_number_of_marriages
+  spouse_currently_in_military
+  
+  transition_screen
+  date_of_marriage
+  spouses_lived_together
+  affidavit_warning
+  affidavit_of_irretrievable_breakdown
+  no_previous_actions
+  
+  marriage_has_children
+  about_children_of_marriage
+  first_child_name
+  
+  start_indigency
+  aff_of_indigency_intro
+  ask_affidavit_questions
+  if not is_indigent:
+    doesnt_qualify_ending
+  required_documents_screen
+  preview
+  basic_questions_signature_flow
+  download
+mandatory: True
+---
+id: AL Intro Screen
+code: |
+  interview_short_title = "File for a No-Fault 1A Divorce"
+---
+id: Divorce Intro Screen
+question: |
+  ### File for a No-Fault 1A Divorce
+subquestion: |
+
+  ##### Information About Filing a No-Fault 1A Divorce
+  In an uncontested divorce, also called a "**no-fault 1A divorce**," the process is simpler, faster, and less expensive than a contested divorce. Oftentimes, many couples find that they can file an uncontested divorce without hiring an attorney.  
+  
+  To file for an uncontested divorce in Massachusetts, you must agree with your spouse on the no-fault reason your marriage is ending, meet the state's residency requirement, and have an agreement with your spouse on the issues in your divorce. 
+  
+  ##### Divorce Online in Massachusetts
+  If your divorce is uncontested and your spouse is willing to sign the paperwork, you can use this online divorce tool to help complete your Massachusetts divorce forms online. It's important to keep in mind that this tool is solely intended to assist with document preparation, and that the final decision on granting an official divorce rests solely with a court.
+  
+  **This online divorce tool offers a straightforward solution for spouses seeking an amicable separation by providing a user-friendly tool for completing the necessary paperwork:** 
+  
+  **Step 1:** Qualify for an uncontested divorce  
+  **Step 2:** Provide your case details  
+  **Step 3:** Download your court-ready divorce forms  
+  **Step 4:** File for a divorce
+continue button field: divorce_intro_screen
+mandatory: True
+section: Introduction
+---
+id: Divorce Eligibility Questions
+question: Marital Requirements
+fields:
+  - "Are you legally married?": user_legally_married
+    datatype: yesnoradio
+  - "Is your marriage broken beyond repair?": broken_beyond_repair
+    datatype: yesnoradio
+    show if:
+      variable: user_legally_married
+      is: True
+section: Divorce Eligibility
+---
+id: Divorce Eligibility Questions Part II
+question: No-Fault Requirement
+subquestion: For an uncontested divorce agreement to be possible, the spouses must be in a full agreement as to all the outstanding issues of a divorce.
+fields:
+  - "Do you and your spouse agree on all possible issues?": full_agreement
+    datatype: yesnoradio
+help:
+  label: What kind of issues?
+  heading: Common Divorce Issues
+  content: |
+    * Child Custody
+    * Parenting Time
+    * Child Support
+    * Alimony
+    * Division of Assets
+---
+id: Divorce Eligibility Screen Part III
+question: Massachusetts Residency Requirements
+subquestion: All states have residency requirements that must be met before you may get a divorce in their courts.
+fields:
+  - "Have you lived in Massachusetts for 1 or more years?": mass_resident
+    datatype: yesnoradio
+  - "Did the reason the marriage ended happen in Massachusetts?": reason_in_mass
+    datatype: yesnoradio
+    show if:
+      variable: mass_resident
+      is: False
+  - "Have you lived in Massachusetts as a couple with your spouse?": is_mass_couple
+    datatype: yesnoradio
+    show if:
+      variable: reason_in_mass
+      is: True
+section: Divorce Eligibility
+---
+id: Eligible Screen
+question: You Are Eligible!
+subquestion: |
+  Based on your responses, it appears that you do meet the requirements to file for an uncontested divorce in the State of Massachusetts.
+  
+  With this determination, you can move forward confidently with the streamlined and simplified process provided by this online tool.
+  
+continue button field: divorce_eligibility_screen
+mandatory: True
+---
+id: Not Eligible Screen
+question: Sorry, You Are Not Eligible!
+subquestion: |
+  Based on your responses, it appears that you do not meet the requirements to file for an uncontested divorce in the State of Massachusetts. 
+
+  If you are still interested in filing for a no-fault divorce or need more help, please [consult an attorney](http://masslegalhelp.org/find-legal-aid).
+event: not_eligible_screen
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+id: General Information Questions (User)
+question: About You
+fields:
+  - First Name: users[0].name.first
+  - Middle Name: users[0].name.middle
+    required: False
+  - Last Name: users[0].name.last
+  - Surname upon Divorce: users[0].surname_upon_divorce
+  - Surname at Birth or Adoption: users[0].surname_at_birth
+section: General Information
+---
+id: General Information Questions (User)
+question: About You
+fields:
+  - Sex: users[0].gender
+    input type: radio
+    choices:
+      - Male
+      - Female
+  - Social Security Number: users[0].ssn
+    datatype: number
+    required: False
+help:
+  label: Do I need to share my SSN?
+  content: |
+    You can skip this question for now! The reason we ask is because there is one form, [Report of Absolute Divorce or Annulment](https://www.mass.gov/doc/divorce-or-annulment-certification-vital-statistics-r-408/download), that requires your SSN.
+    
+    If you choose to type in your SSN now, the form will be ready to file at the end of this questionnaire. **This system will not store or share your SSN.** 
+    
+    If you would prefer to write your SSN on this form directly, you can print out this form at the end of this questionnaire and write your SSN on the form before you file.
+section: General Information
+---
+id: General Information Sex Question Code
+code: |
+  users[0].male = "Male"
+  users[0].female = "Female"
+mandatory: True
+---
+id: General Information Questions (User)
+question: About You
+subquestion: What is your current residence? *Not a mailing address.*
+fields:
+  - Address: users[0].address.address
+    address autocomplete: True
+  - City: users[0].address.city
+  - State: users[0].address.state
+    code: |
+      states_list()
+  - Zip: users[0].address.zip
+  - County: users[0].address.county
+section: General Information
+---
+id: General Information Questions (User)
+question: About You
+fields: 
+  - What number is this marriage for you?: user_number_of_marriages
+    datatype: number
+  - How many minor children are in your custody?: user_number_of_minor_children
+    datatype: number
+section: General Information
+---
+id: General Information Questions (User Military)
+question: Military Service
+subquestion: |
+  ###### About the Military Affidavit
+  
+  If you or your spouse is in military service, the court shall appoint an attorney to represent that person and protect their interest in accordance with the Soldiers' and Sailors' Relief Act.  This Act protects those on active duty status can request a delay in proceedings if they can show that their military responsibilities preclude their proper representation in court.
+  
+  *Answer "Yes" to only one of the following questions:*
+fields:
+  - Are you currently in military service?: user_currently_in_military
+    datatype: yesnoradio
+  - Are you NOT currently in military service?: user_not_in_military
+    datatype: yesnoradio
+  - Write any necessary facts to support your answer: user_military_affidavit
+    datatype: text
+  - Do you hereby state under oath or affirmation that your answers are true?: user_acknowledges_military_affidavit
+    datatype: yesnoradio
+section: General Information
+---
+id: Spouse Information Screen
+question: Your Progress
+subquestion: |
+  ##### First Steps: Completed
+  
+  This system has started filling out the documents for you to file for a divorce at the end of this questionnaire. 
+  
+  ##### Next Section: Your Spouse's General Information
+  
+  Please be aware that the next section is going to repeat the same questions to collect your spouse's general information. You will not be able to move forward with the questionnaire if you do not know your spouse's general information. **Do not lie or attempt to guess** your spouse's information. 
+section: General Information
+continue button field: spouse_info_screen
+---
+id: General Information Questions (Spouse)
+question: About Your Spouse
+fields:
+  - First Name: other_parties[0].name.first
+  - Middle Name: other_parties[0].name.middle
+    required: False
+  - Last Name: other_parties[0].name.last
+  - Surname upon Divorce: other_parties[0].surname_upon_divorce
+  - Surname at Birth or Adoption: other_parties[0].surname_at_birth
+section: General Information
+---
+id: General Information Questions (Spouse)
+question: About Your Spouse
+fields:
+  - Sex: other_parties[0].gender
+    input type: radio
+    choices:
+      - Male
+      - Female
+  - Social Security Number: other_parties[0].ssn
+    datatype: number
+    required: False
+help:
+  label: Do I need to share my spouse's SSN?
+  content: |
+    You can skip this question for now! The reason we ask is because there is one form, [Report of Absolute Divorce or Annulment](https://www.mass.gov/doc/divorce-or-annulment-certification-vital-statistics-r-408/download), that requires your spouse's SSN.
+    
+    If you choose to type in your spouse's SSN now, the form will be ready to file at the end of this questionnaire. **This system will not store or share your SSN.** 
+    
+    If you would prefer to write your spouse's SSN on this form directly, you can print out this form at the end of this questionnaire and write your spouse's SSN on the form before you file.
+section: General Information
+---
+id: General Information Sex Question Code
+code: |
+  other_parties[0].male = "Male"
+  other_parties[0].female = "Female"
+mandatory: True
+---
+id: General Information Questions (Spouse)
+question: About Your Spouse
+subquestion: What is your spouse's current residence? *Not a mailing address.*
+fields:
+  - Address: other_parties[0].address.address
+    address autocomplete: True
+  - City: other_parties[0].address.city
+  - State: other_parties[0].address.state
+    code: |
+      states_list()
+  - Zip: other_parties[0].address.zip
+  - County: other_parties[0].address.county
+section: General Information
+---
+id: General Information Questions (Spouse)
+question: About Your Spouse
+fields: 
+  - What number is this marriage for your spouse?: spouse_number_of_marriages
+    datatype: number
+  - How many minor children are in your spouse's custody?: spouse_number_of_minor_children
+    datatype: number
+section: General Information
+---
+id: General Information Questions (Spouse Military)
+question: Military Service
+subquestion: |
+  ###### About the Military Affidavit
+  
+  If you or your spouse is in military service, the court shall appoint an attorney to represent that person and protect their interest in accordance with the Soldiers' and Sailors' Relief Act.  This Act protects those on active duty status can request a delay in proceedings if they can show that their military responsibilities preclude their proper representation in court.
+  
+  *Answer "Yes" to only one of the following questions:*
+fields:
+  - Is your spouse currently in military service?: spouse_currently_in_military
+    datatype: yesnoradio
+  - Is your spouse NOT currently in military service?: spouse_not_in_military
+    datatype: yesnoradio
+  - Are you unable to determine whether your spouse is in military service?: cannot_determine_spouse_military_service
+    datatype: yesnoradio
+  - Write any necessary facts to support your answer: spouse_military_affidavit
+    datatype: text
+section: General Information
+---
+id: Transition to Questionnaire Screen
+question: Your Progress
+subquestion: |
+  ##### Second Steps: Completed
+  
+  This system has started filling out the documents for you to file for a divorce at the end of this questionnaire. 
+  
+  ##### Next Section: Questionnaire
+  
+  Please be aware that the next section is going to ask several questions about your marriage, children, and assets. The purpose of these questions is for this system to fill out the court documents for you to print at the end. It is important to answer all the questions in this interview truthfully.
+section: Questionnaire
+continue button field: transition_screen
+---
+id: About Marriage Questions
+question: About Your Marriage
+fields:
+  - When did you marry ${ other_parties[0].name }?: date_of_marriage
+    datatype: date
+  - Where were you lawfully married at?: address_of_marriage
+    datatype: text
+    address autocomplete: True
+  - What city were you married in?: city_of_marriage
+    datatype: text
+  - What state or country were you married in?: state_or_country_of_marriage
+    datatype: text
+  - When did your marriage suffer an irretrievable breakdown?: date_of_irretrievable_breakdown
+    datatype: date
+section: About Marriage
+---
+id: About Marriage Questions
+question: About Your Marriage
+fields:
+  - Did you and ${ other_parties[0].name.first } ever lived together?: spouses_lived_together
+    datatype: yesnoradio
+  - When did you last lived together?: date_of_last_lived_together
+    datatype: date
+    show if:
+      variable: spouses_lived_together
+      is: True
+  - Where did you last live together?: address_of_last_lived_together
+    datatype: text
+    address autocomplete: True
+    show if:
+      variable: spouses_lived_together
+      is: True
+section: About Marriage
+---
+id: Affidavit Warning
+question: Affidavit Warning
+subquestion: |
+  You will need to explain to the judge what has caused your marriage to suffer an irretrievable breakdown. 
+  
+  The answers you give in this interview will help you write an "affidavit." An affidavit is a written statement that tells the judge your story. It is your chance to tell the judge what has happened and why you need to file.
+  
+  It is important to answer all the questions in this interview truthfully. You will be signing your affidavit "{under oath}." This means you swear your answers are true, as far as you know.
+field: affidavit_warning
+terms:
+  - under oath: |
+      * The court can punish you if your answers are not true to the best of your knowledge.
+      * The court cannot punish you if your answers are about things you saw, heard, or felt.
+      * The court cannot punish you if you have good reason to believe your answers are true.
+---
+id: About Marriage (Affidavit of Irretrievable Breakdown)
+question: Reason(s) Behind Divorce
+subquestion: |
+  In particular, our marriage has suffered an irretrievable breakdown because: 
+fields:
+  - Reason(s): affidavit_of_irretrievable_breakdown
+    input type: area
+    rows: 6
+  - Today's Date: date_of_affidavit_of_irretrievable_breakdown
+    datatype: date
+---
+id: About Marriage (Affidavit for Joint Petition)
+question: Previous Action(s) Between Spouses
+subquestion: |
+  Has there been any previous action(s) for divorce, annulment or affirmation of marriage, separate support, desertion, living apart for justifiable cause, or custody of child(ren) brought by either spouse against the other spouse?
+fields:
+  - Has there been any previous action(s)?: no_previous_actions
+    datatype: yesnoradio
+  - Explain the previous action(s): previous_actions_affidavit
+    input type: area
+    show if:
+      variable: no_previous_actions
+      is: True
+section: About Marriage
+---
+id: About Children
+question: Children of this Marriage
+fields:
+  - Are there any children of this marriage?: marriage_has_children
+    datatype: yesnoradio
+  - How many children of this marriage in total?: total_number_of_children
+    datatype: number
+    show if:
+      variable: marriage_has_children
+      is: True
+section: About Children
+---
+id: About Children (Separation Agreement)
+question: Children of this Marriage
+subquestion: Please provide more information on the children of the marriage below.
+fields:
+  - "Select the best answer(s)": about_children_of_marriage
+    datatype: checkboxes
+    choices:
+      - There are no children born or adopted of this marriage: marriage_has_no_children
+      - There are no children born or adopted of this marriage under 23 years old: marriage_has_no_minor_children
+      - There is a child born of this marriage who is not my child: spouse_has_child
+      - There is a child born of this marriage who is not ${ other_parties[0].name.first }'s child: user_has_child
+section: About Children
+---
+id: About Children
+question: Children of this Marriage
+subquestion: |
+  The children born or adopted of this marriage who are under the age of 23 are: 
+  
+  *List full names and birth dates*
+fields:
+  - 1st Child's Name: first_child_name
+    datatype: text
+  - 1st Child's Birthdate: first_child_birthdate
+    datatype: date
+  - 2nd Child's Name: second_child_name
+    datatype: text
+    required: False
+  - 2nd Child's Birthdate: second_child_birthdate
+    datatype: date
+    required: False
+  - 3rd Child's Name: third_child_name
+    datatype: text
+    required: False
+  - 3rd Child's Birthdate: third_child_birthdate
+    datatype: date
+    required: False
+  - 4th Child's Name: fourth_child_name
+    datatype: text
+    required: False
+  - 4th Child's Birthdate: fourth_child_birthdate
+    datatype: date
+    required: False
+  - 5th Child's Name: fifth_child_name
+    datatype: text
+    required: False
+  - 5th Child's Birthdate: fifth_child_birthdate
+    datatype: date
+    required: False
+section: About Children
+right: |
+  **Note:** Due to a limited amount of space, this interview cannot support families with more than five (5) children. We apologize for the inconvenience.
+---
+comment: Insert Separation Agreement and Parenting Time Agreement Here
+---
+id: About Assets Code Block
+code: |
+  if preferred_plan == 'Shared Plan':
+    spouse_with_plan
+    share_plans_indefinitely
+    cover_full_insurance_premium
+  cover_costs_independently
+  spousal_benefit
+mandatory: True
+---
+id: About Assets
+question: Individual or Shared Plans
+subquestion: |
+  ##### About Health, Dental and Vision Insurance
+  
+  Health insurance law is very complicated. Your divorce affects your health care coverage when you are on the same plan. You must find out what happens when your divorce is final, when one of you remarries, or the employee leaves the job, or the employer changes plans. You must decide who will pay for the coverage and who will pay the extra income tax that the IRS may charge after your divorce.
+  
+  As agreed upon both spouses, please choose the plan for when the divorce is finalized:
+field: preferred_plan
+choices:
+  - Individual Plan
+  - Shared Plan
+---
+id: About Assets
+question: Sharing Insurance Plans
+subquestion: |
+  Which spouse shall provide health insurance for the other spouse and for themself?
+field: spouse_with_plan
+choices:
+  - ${ users[0].name.first }
+  - ${ other_parties[0].name.first }
+section: About Assets
+---
+id: About Assets
+question: Sharing Insurance Plans
+subquestion: |
+  Determine how long to share health insurance plans: *Choose one answer only*
+fields:
+  - "As long as its allowed and available by the plan": share_plans_indefinitely
+    datatype: yesnowide
+  - "Until a specific date or event occurs": specific_timeline_to_share_plans
+    datatype: yesnowide
+  - "Until when exactly?": explain_timeline_to_share_plans
+    datatype: text
+    show if:
+      variable: specific_timeline_to_share_plans
+      is: True
+section: About Assets
+---
+id: About Assets
+question: Health Insurance Cost(s)
+subquestion: |
+  Who will cover the costs of maintaining the insurance plan? *Choose one answer only*
+fields:
+  - "One spouse shall be held responsible to pay the full insurance premium": cover_full_insurance_premium
+    datatype: yesnowide
+  - "Who shall be responsible?": spouse_paying_insurance_premium
+    datatype: combobox
+    choices:
+      - ${ users[0].name }
+      - ${ other_parties[0].name }
+    show if:
+      variable: cover_full_insurance_premium
+      is: True
+  - "${ spouse_with_plan } shall be reimbursed by the other spouse on a monthly basis": reimburse_monthly
+    datatype: yesnowide
+  - Monthly Amount: monthly_reimbursement_variable
+    datatype: currency
+    min: 0
+    show if:
+      variable: reimburse_monthly
+      is: True
+    help: |
+      How much should the other spouse pay per month toward the cost of the health insurance
+  - "${ spouse_with_plan } shall be reimbursed by the other spouse on a monthly basis in the amount of the premium's increased cost over what it would cost ${ spouse_with_plan } to insure only themself and/or the child(ren)": reimburse_increased_premium_monthly
+    datatype: yesnowide
+section: About Assets
+---
+id: Costs For Each Spouse Not Covered By Insurance
+question: Costs Not Covered By Insurance
+subquestion: |
+  Determine how the costs for each spouse not covered by insurance will be paid for: 
+under: |  
+  **Please Note:** Costs not fully covered by insurance may be co-pays, deductibles, counseling, dental, orthodontic, eye glasses, etc.
+fields:
+  - "Each of us shall be responsible for our own health, dental, and vision costs not covered by insurance": cover_costs_independently
+    datatype: yesnowide
+  - "Other": cover_costs_other
+    datatype: yesnowide
+  - "Please Explain": cover_costs_other_explained
+    datatype: text
+    show if:
+      variable: cover_costs_other
+      is: True
+section: About Assets
+---
+id: Life Insurance for Other Benefits
+question: Life Insurance For Benefit of the Other
+subquestion: |
+  This section is for spouses interested in keeping life insurance money for the benefit of another. If agreed upon, please select the option below:
+fields:
+  - "One spouse shall keep life insurance money on their life for the benefit of another": spousal_benefit
+    datatype: yesnowide
+---
+id: Life Insurance for Other Benefits
+question: Life Insurance For Benefit of the Other
+subquestion: |
+  Please explain how the life insurance plan will be handled to benefit another:
+fields:
+  - "Which spouse shall keep the life insurance money on their life for the other's benefit?": spouse_with_insurance_benefits
+    datatype: combobox
+    choices:
+      - ${ users[0].name }
+      - ${ other_parties[0].name }
+  - "How much money shall ${ spouse_with_insurance_benefits } keep?": life_insurance_variable
+    datatype: currency
+    min: 1
+  - "For the benefit of who?": party_with_life_insurance_benefits
+    datatype: text
+  - "Until when?": length_of_life_insurance_benefits
+    datatype: text
+section: About Assets
+---
+id: Special Requests
+question: Request to Waive Court Fees
+subquestion: |
+  If you cannot afford to pay for [court fees and costs](https://www.mass.gov/info-details/probate-and-family-court-filing-fees), you may be able to have the state pay for them if you qualify.
+fields:
+  - "Would you like to see if you qualify?": start_indigency
+    datatype: yesnoradio
+section: Special Requests
+---
+id: Conclusion
+question: Required Documents
+field: required_documents_screen
+subquestion: |
+  Based on your responses, you will need to file the following documents:
+  
+  - A certified copy of your marriage certificate
+  - Separation Agreement
+  - Joint Petition for Divorce Form (signed by both spouses or their lawyers)
+  - Affidavit of Irretrievable Breakdown (signed by both spouses)
+  - Record of Absolute Divorce
+  - Financial Statement (from each spouse)
+  % if marriage_has_children:
+  - Affidavit Disclosing Care or Custody Proceeding
+  - Child Support Guidelines
+  - Parenting Time Agreement
+  % endif
+section: Conclusion
+---
