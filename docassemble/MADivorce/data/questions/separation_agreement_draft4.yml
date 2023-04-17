@@ -1,0 +1,504 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.ALMassachusetts:al_massachusetts.yml
+  - docassemble.MassAccess:massaccess.yml
+---
+metadata:
+  title: |
+    Separation Agreement
+  short title: |
+    Separation Agreement
+  tags:
+    - FA-00-00-00-00
+  authors:
+    - Nini Sprinkle
+---
+mandatory: True
+comment: |
+  Global interview metadata
+variable name: interview_metadata["separation_agreement_draft4"]
+data:
+  al_weaver_version: "1.8.0"
+  generated on: "2023-02-27"
+  title: >-
+    Separation Agreement
+  short title: >-
+    Separation Agreement
+  description: |-
+    Separation Agreement
+  allowed courts: 
+    - "Probate and Family Court"
+  categories:
+    - "FA-00-00-00-00"
+  typical role: "plaintiff"
+  generate download screen: True
+---
+code: |
+  interview_metadata['main_interview_key'] =  'separation_agreement_draft4'
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "MA"
+---
+code: |
+  github_repo_name =  'docassemble-SeparationAgreementDraft4'
+---
+code: |
+  interview_short_title = "Ask the court for a Separation Agreement"
+---
+code: |
+  al_form_type = "starts_case" 
+---
+objects:
+  - users: ALPeopleList.using(target_number=2,ask_number=True)
+---
+sections:
+  - review_separation_agreement_draft4: Review your answers
+---
+#################### Interview order #####################
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_separation_agreement_draft4
+code: |
+  about_authorization
+  trial_court.address.county
+  Mass_Agreement
+  petitioner_a_right_to_consult
+  petitioner_b_right_to_consult
+  complete_agreement
+  party_debt
+  agreement_incorporation
+  legal_fees
+  petitioner_a_voluntarily
+  petitioner_b_voluntarily
+  set_parts(subtitle=str(users))
+  set_progress(50)
+  merge_judgment
+  independent_contract
+  independent_except
+  _shared_financial_statement
+  signature_date
+  interview_order_separation_agreement_draft4 = True
+---
+###################### Main order ######################
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+code: |
+  interview_order_separation_agreement_draft4
+  signature_date
+  # Store anonymous data for analytics / statistics
+  store_variables_snapshot(
+      persistent=True,
+      data={
+          "zip": showifdef("users[0].address.zip"),
+          "reached_interview_end": True,
+      },
+  )
+  separation_agreement_draft4_download
+---
+id: About this Form
+question: |
+  Need Authorization
+subquestion: |
+  This section will present a series of statements to fill out your Separation Agreement. You need to confirm that you have read and agreed to each statement.
+continue button field: about_authorization
+section: Authorization
+---
+id: Demographic Information
+question: |
+  Demographic Information
+fields:
+  - "Petitioner #1's Name": users[0].name.full
+  - "Petitioner # 1's Address": users[0].address
+  - "Petitioner #2's Name": users[1].name
+  - "Petitioner #2's Address": users[1].address
+---
+id: Marriage Information
+question: |
+  Marriage Information
+fields:
+  - "Date of Marriage": marriage_date
+    datatype: date
+  - "City of Marriage": m_address_city
+  - "State of Marriage": m_address_state
+---
+id: Agreements for this Separation
+question: Massachusetts Standards
+fields:
+  - "Both Parties agree that this agreement is entered into in the Commonwealth of Massachusetts, and the parties agree that it shall be governed by the laws of the Commonwealth of Massachusetts.": Mass_Agreement
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.  
+---
+id: Petitioner A's understanding of right to counsel.
+question: |
+  Right to Counsel
+fields:
+  - "I understand that I had the right to consult with a lawyer of my choosing before signing this agreement.": petitioner_a_right_to_consult
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.  
+---
+id: Petitioner B's understanding of right to counsel.
+question: |
+  Your Spouse's Right to Counsel.
+fields:
+  - "${ other_parties[0].name } agrees that they understand that they had the right to consult with a lawyer of their choosing before signing this Agreement.": petitioner_b_right_to_consult
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.  
+---
+id: Agreement by all parties that this is the entirety of the agreement.
+question: |
+  Entirety of the Agreement
+fields:
+  - "The parties have included in this Agreement their entire understanding. No spoken or written statement outside of this Agreement was relied on by either party in signing this Agreement.": complete_agreement
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: No new debt
+question: No New Debt(s)
+subquestion: |
+  Neither party will incur debt that the other will be responsible for.
+fields:
+  - "The parties agree that neither party will charge or incur any debt for which the other party will be responsible. Neither party will use the other’s name to obtain credit of any kind.": party_debt
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Agreement incorporated into Divorce Judgment
+question: Divorce Judgment
+subquestion: |
+  This agreement will be incorporated into any divorce judgment.
+fields:
+  - "If, after this Agreement is signed by both parties, a judgment is entered in any divorce proceeding in any court brought by either Petitioner against the other, then this Agreement shall be incorporated in and made a part of that judgment.": agreement_incorporation
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Legal Fees
+question: Legal Fees
+subquestion: |
+  Responsibility for legal fees and costs of proceedings 
+fields:
+  - "Both spouses are each responsible for their own legal fees and costs in these proceedings up to the present.": legal_fees
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Petitioner A Agreement to sign
+question: Agreement to Sign
+fields:
+  - "I sign this Agreement freely and voluntarily.": petitioner_a_voluntarily
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Petitioner B Agreement to sign
+question: Your Spouse's Agreement to Sign
+subquesiton: |
+  My spouse agrees that they sign this Agreement freely and voluntarily.
+fields:
+  - "My spouse signs this Agreement freely and voluntarily.": petitioner_b_voluntarily
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Merged Judgment Agreement
+question: Merged Judgment Agreement
+fields:
+  - "Do you agree that this Agreement shall merge in the judgment so that it will not remain as an independent contract, and if there is a material change of circumstances in the future, the Court will be able to modify the terms(complaint for modification)?": merge_judgment
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Independent Contract Agreement
+question: |
+  Agreements for Independent Contract
+fields:
+  - "Do you agree that this Agreement shall survive as an independent contract? Which means that even if there were a material change of circumstances in the future, the Court would not be able to modify the terms unless there were countervailing equities(extraordinary circumstances, such as the incapacity of a party).": independent_contract
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: Exceptions for Independent Contract Agreement
+question: |
+  Agreement for Independent Contract Exceptions
+fields:
+  - "Do both parties agree that the Agreement shall survive as an independent contract EXCEPT for those parts of the Agreement which deal with alimony / health insurance. The parts of the Agreement which deal with the alimony/ health insurance shall merge in the judgment?": independent_except
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+under: |
+  If there's a major change of circumstances regarding alimony or health insurance in the future, the Court can change it. Other parts of the Agreement, even if there was a major change, will not be changed except for extraordinary circumstances (ex: incapacity).
+---
+id: Financial Statement
+question: Financial Statements
+subquestion: |
+  Confirmation that each party's financial statements were shared with eachother
+fields:
+  - "Did both parties complete and share their financial statements?": _shared_financial_statement
+    label above field: True
+    datatype: checkboxes
+    none of the above: False    
+    minlength: 1
+    choices:
+      - Yes
+    validation messages:
+      minlength: |
+        You cannot continue unless you agree to this provision.
+---
+id: preview separation_agreement_draft4
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.   
+  
+  ${ al_court_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab. Click the "Edit answers" button
+  to edit your answers.
+
+  ${ action_button_html(url_action('review_separation_agreement_draft4'), label='Edit answers', color='info') }
+  
+  Remember to come back to this window to continue and sign your form.
+continue button field: separation_agreement_draft4_preview_question    
+---
+code: |
+  signature_fields = ['users[0].signature', 'users[1].signature']
+---
+code: |
+  # This is a placeholder for the addresses that will be searched
+  # for matching address to court. Edit if court venue is based on 
+  # a different address than the user's
+  [user.address.address for user in users.complete_elements()]
+  addresses_to_search = [user.address.address for user in users.complete_elements()]
+---
+id: separation agreement draft4 review screen
+event: review_separation_agreement_draft4
+question: |
+  Review your answers
+review:
+  - Edit: users.revisit
+    button: |
+      **Users**
+
+      % for item in users:
+        * ${ item }
+      % endfor
+  - Edit: m_address_city
+    button: |
+      **City**:
+      ${ m_address_city }
+  - Edit: users[0].address
+    button: |
+      **Petitioner # 1's Address**:
+      ${ users[0].address() }
+  - Edit: m_address_state
+    button: |
+      **State**:
+      ${ m_address_state }
+  - Edit: marriage_date
+    button: |
+      **Date of Marriage**:
+      ${ marriage_date }
+  - Edit: users[1].address
+    button: |
+      **Petitioner #2's Address**:
+      ${ users[1].address() }
+  - Edit: users[0].name.full
+    button: |
+      **Petitioner #1's Name**:
+      ${ users[0].name.full }
+  - Edit: users[1].name.full
+    button: |
+      **Petitioner #2's Name**:
+      ${ users[1].name.full }
+  - Edit: signature_date
+    button: |
+      **Date of Signature**:
+      ${ signature_date }
+  - Edit: Mass_Agreement
+    button: |
+      **Both Parties agree that this agreement is entered into in the Commonwealth of Massachusetts, and the parties agree that it shall be governed by the laws of the Commonwealth of Massachusetts.**:
+      ${ word(yesno(Mass_Agreement)) }
+  - Edit: petitioner_a_right_to_consult
+    button: |
+      **Petitioner A agrees that they understand that they had the right to consult with a lawyer of their choosing before signing this agreement.**:
+      ${ word(yesno(petitioner_a_right_to_consult)) }
+  - Edit: petitioner_b_right_to_consult
+    button: |
+      **Petitioner B agrees that they understand that they had the right to consult with a lawyer of their choosing before signing this Agreement.**:
+      ${ word(yesno(petitioner_b_right_to_consult)) }
+  - Edit: complete_agreement
+    button: |
+      **The parties have included in this Agreement their entire understanding. No spoken or written statement outside of this Agreement was relied on by either party in signing this Agreement.**:
+      ${ word(yesno(complete_agreement)) }
+  - Edit: party_debt
+    button: |
+      **The parties agree that neither party will charge or incur any debt for which the other party will be responsible. Neither party will use the other’s name to obtain credit of any kind.**:
+      ${ word(yesno(party_debt)) }
+  - Edit: agreement_incorporation
+    button: |
+      **If, after this Agreement is signed by both parties, a judgment is entered in any divorce proceeding in any court brought by either Petitioner against the other, then this Agreement shall be incorporated in and made a part of that judgment. In addition to being incorporated in the judgment;**:
+      ${ word(yesno(agreement_incorporation)) }
+  - Edit: legal_fees
+    button: |
+      **The petitioners  are each responsible for their own legal fees and costs in these proceedings up to the present.**:
+      ${ word(yesno(legal_fees)) }
+  - Edit: petitioner_a_voluntarily
+    button: |
+      **Petitioner A signs this Agreement freely and voluntarily.**:
+      ${ word(yesno(petitioner_a_voluntarily)) }
+  - Edit: petitioner_b_voluntarily
+    button: |
+      **Petitioner B signs this Agreement freely and voluntarily.**:
+      ${ word(yesno(petitioner_b_voluntarily)) }
+---
+continue button field: users.revisit
+question: |
+  Edit users
+subquestion: |
+  ${ users.table }
+
+  ${ users.add_action() }
+---
+table: users.table
+rows: users
+columns:
+  - Signature: |
+      row_item.signature if defined("row_item.signature") else ""
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+edit:
+  - signature
+  - name.full
+confirm: True
+
+---
+id: download separation_agreement_draft4
+event: separation_agreement_draft4_download
+question: |
+  All done
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+  
+  View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
+
+  ${ action_button_html(url_action('review_separation_agreement_draft4'), label='Edit answers', color='info') }
+  
+  
+  ${ al_user_bundle.download_list_html() }
+  
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=True) }
+
+progress: 100
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - separation_agreement_draft4_Post_interview_instructions: ALDocument.using(title="Instructions", filename="separation_agreement_draft4_next_steps.docx", enabled=True, has_addendum=False)
+  - separation_agreement_draft4_attachment: ALDocument.using(title="Separation Agreement", filename="separation_agreement_draft4", enabled=True, has_addendum=False, )
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[separation_agreement_draft4_Post_interview_instructions, separation_agreement_draft4_attachment], filename="separation_agreement_draft4", title="All forms to download for your records", enabled=True)
+  - al_court_bundle: ALDocumentBundle.using(elements=[separation_agreement_draft4_attachment],  filename="separation_agreement_draft4", title="All forms to deliver to court", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: separation_agreement_draft4_next_steps
+  docx template file: separation_agreement_draft4_next_steps.docx
+  variable name: separation_agreement_draft4_Post_interview_instructions[i]
+  skip undefined: True
+---
+attachment:
+  name: separation agreement draft4
+  filename: separation_agreement_draft4
+  variable name: separation_agreement_draft4_attachment[i]
+  skip undefined: True
+  docx template file: separation_agreement_draft4.docx
+
+
